@@ -15,6 +15,7 @@ bool is_valid_message(const string &text) {
     return true;
 }
 
+// Mã hóa
 string rail_fence_encrypt(const string &plaintext, int rails) {
     if (rails <= 1 || plaintext.empty()) return plaintext;
 
@@ -23,20 +24,62 @@ string rail_fence_encrypt(const string &plaintext, int rails) {
     int direction = 1;
 
     for (char c : plaintext) {
-        // TODO(student): Q6 can keep spaces as normal characters.
         fence[rail] += c;
         rail += direction;
-        if (rail == rails - 1 || rail == 0) direction = -direction;
+
+        if (rail == rails - 1 || rail == 0)
+            direction = -direction;
     }
 
     string ciphertext;
-    for (const string &row : fence) ciphertext += row;
+    for (const string &row : fence)
+        ciphertext += row;
+
     return ciphertext;
 }
 
+// Giải mã (Q5)
 string rail_fence_decrypt(const string &ciphertext, int rails) {
-    // TODO(student): Q5
-    return ciphertext;
+    if (rails <= 1 || ciphertext.empty()) return ciphertext;
+
+    int n = ciphertext.length();
+
+    // Bước 1: tạo ma trận đánh dấu zigzag
+    vector<vector<char>> fence(rails, vector<char>(n, '\n'));
+
+    int rail = 0, direction = 1;
+    for (int i = 0; i < n; i++) {
+        fence[rail][i] = '*';
+        rail += direction;
+
+        if (rail == rails - 1 || rail == 0)
+            direction = -direction;
+    }
+
+    // Bước 2: điền ciphertext vào vị trí đã đánh dấu
+    int index = 0;
+    for (int i = 0; i < rails; i++) {
+        for (int j = 0; j < n; j++) {
+            if (fence[i][j] == '*' && index < n) {
+                fence[i][j] = ciphertext[index++];
+            }
+        }
+    }
+
+    // Bước 3: đọc lại theo zigzag
+    string plaintext;
+    rail = 0;
+    direction = 1;
+
+    for (int i = 0; i < n; i++) {
+        plaintext += fence[rail][i];
+        rail += direction;
+
+        if (rail == rails - 1 || rail == 0)
+            direction = -direction;
+    }
+
+    return plaintext;
 }
 
 string read_message_from_file(const string &path) {
