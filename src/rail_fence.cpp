@@ -15,7 +15,6 @@ bool is_valid_message(const string &text) {
     return true;
 }
 
-// Mã hóa
 string rail_fence_encrypt(const string &plaintext, int rails) {
     if (rails <= 1 || plaintext.empty()) return plaintext;
 
@@ -26,57 +25,45 @@ string rail_fence_encrypt(const string &plaintext, int rails) {
     for (char c : plaintext) {
         fence[rail] += c;
         rail += direction;
-
-        if (rail == rails - 1 || rail == 0)
-            direction = -direction;
+        if (rail == rails - 1 || rail == 0) direction = -direction;
     }
 
     string ciphertext;
-    for (const string &row : fence)
-        ciphertext += row;
-
+    for (const string &row : fence) ciphertext += row;
     return ciphertext;
 }
 
-// Giải mã (Q5)
 string rail_fence_decrypt(const string &ciphertext, int rails) {
     if (rails <= 1 || ciphertext.empty()) return ciphertext;
 
-    int n = ciphertext.length();
+    const int n = static_cast<int>(ciphertext.size());
+    vector<vector<char>> pattern(rails, vector<char>(n, '\0'));
 
-    // Bước 1: tạo ma trận đánh dấu zigzag
-    vector<vector<char>> fence(rails, vector<char>(n, '\n'));
-
-    int rail = 0, direction = 1;
-    for (int i = 0; i < n; i++) {
-        fence[rail][i] = '*';
+    int rail = 0;
+    int direction = 1;
+    for (int col = 0; col < n; ++col) {
+        pattern[rail][col] = '*';
         rail += direction;
-
-        if (rail == rails - 1 || rail == 0)
-            direction = -direction;
+        if (rail == rails - 1 || rail == 0) direction = -direction;
     }
 
-    // Bước 2: điền ciphertext vào vị trí đã đánh dấu
-    int index = 0;
-    for (int i = 0; i < rails; i++) {
-        for (int j = 0; j < n; j++) {
-            if (fence[i][j] == '*' && index < n) {
-                fence[i][j] = ciphertext[index++];
+    int idx = 0;
+    for (int r = 0; r < rails; ++r) {
+        for (int c = 0; c < n; ++c) {
+            if (pattern[r][c] == '*' && idx < n) {
+                pattern[r][c] = ciphertext[idx++];
             }
         }
     }
 
-    // Bước 3: đọc lại theo zigzag
     string plaintext;
+    plaintext.reserve(n);
     rail = 0;
     direction = 1;
-
-    for (int i = 0; i < n; i++) {
-        plaintext += fence[rail][i];
+    for (int col = 0; col < n; ++col) {
+        plaintext += pattern[rail][col];
         rail += direction;
-
-        if (rail == rails - 1 || rail == 0)
-            direction = -direction;
+        if (rail == rails - 1 || rail == 0) direction = -direction;
     }
 
     return plaintext;
@@ -84,6 +71,7 @@ string rail_fence_decrypt(const string &ciphertext, int rails) {
 
 string read_message_from_file(const string &path) {
     ifstream fin(path);
+    if (!fin.is_open()) return "";
     string line;
     getline(fin, line);
     return line;
@@ -110,6 +98,11 @@ int main() {
 
     cout << "Enter rails: ";
     cin >> rails;
+
+    if (rails < 2) {
+        cout << "Invalid rails. Please enter an integer >= 2.\n";
+        return 0;
+    }
 
     if (!is_valid_message(message)) {
         cout << "Invalid input. Only letters and spaces are allowed.\n";

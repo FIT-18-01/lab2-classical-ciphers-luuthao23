@@ -15,4 +15,5 @@
 - [x] Đã đọc dữ liệu từ `data/input.txt`
 
 ## Điều em học được từ bài lab
-Viết 3-5 dòng ngắn gọn ở đây.
+- Cài đặt và mở rộng **Caesar Cipher**.
+- Cài đặt và mở rộng **Rail Fence Cipher**.
